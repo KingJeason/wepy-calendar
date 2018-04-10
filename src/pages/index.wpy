@@ -1,0 +1,70 @@
+<style lang="scss" scoped>
+.wrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+.btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 150rpx;
+  height: 50rpx;
+  padding: 10rpx 20rpx;
+  border-radius: 4rpx;
+  font-size: 26rpx;
+  background-color: black;
+  color: white;
+}
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+</style>
+
+<template>
+  <view class="flex-center wrapper">
+    <calendar :visible.sync="calendarVisible"  :value.sync="time" @hanleConfirm.user="hanleConfirm" color="#05c8d3"></calendar>
+    <view class="btn flex-center" @tap="showcalendar">
+      打开日历图
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import calendar from '../components/calendar'
+export default class Index extends wepy.page {
+  config = {
+    navigationBarTitleText: '标题'
+  }
+  components = {
+    calendar
+  }
+  mixins = []
+  data = {
+    calendarVisible: false,
+    time: '2018-04-11'
+  }
+  computed = {
+
+  }
+  methods = {
+    showcalendar () {
+      this.calendarVisible = true
+      // this.$apply()
+    },
+    hanleConfirm (e) {
+      console.log(e)
+    }
+  }
+  events = {
+
+  }
+  onLoad () {
+
+  }
+}
+</script>

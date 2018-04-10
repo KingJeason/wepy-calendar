@@ -1,0 +1,365 @@
+<style lang="scss" scoped>
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.clearfix:after {
+  content: '';
+  height: 0;
+  line-height: 0;
+  display: block;
+  visibility: hidden;
+  clear: both;
+}
+.calendar-bg {
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 100;
+  transition: 0.3s;
+}
+.calendar-wrapper {
+  position: absolute;
+  top: 50rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  border-radius: 8rpx;
+  overflow: hidden;
+  box-sizing: border-box;
+  z-index: 101;
+  height: 900rpx;
+  background-color: white;
+  .confirm {
+    position: absolute;
+    bottom: 30rpx;
+    right: 50rpx;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    align-items: center;
+    font-size: 28rpx;
+    // border-radius: 50%;
+  }
+  // height: ;
+}
+.calendar-header {
+  width: 100%;
+  box-sizing: border-box;
+  height: 130rpx;
+  padding: 30rpx 30rpx;
+  background-color: black;
+  color: white;
+  display: flex;
+  justify-content: flex-start;
+  align-content: center;
+  flex-direction: column;
+  font-size: 24rpx;
+  > view:first-child {
+    color: lightgray;
+  }
+}
+.pick-view {
+  width: 100%;
+  height: 100rpx;
+  position: relative;
+  .pick-img {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    > view {
+      width: 60rpx;
+      height: 100%;
+      position: relative;
+      > image {
+        width: 30rpx;
+        height: 30rpx;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+  }
+}
+picker {
+  width: 130rpx;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.calendar-content {
+  width: 100%;
+  padding: 10rpx 50rpx 30rpx 50rpx;
+  // background-color: lightyellow;
+  background-color: white;
+  box-sizing: border-box;
+  font-size: 24rpx;
+  .week {
+    margin-bottom: 40rpx;
+    > view {
+      flex: 1;
+      color: gray;
+    }
+  }
+  .day {
+    width: 100%;
+    margin-bottom: 40rpx;
+    > view {
+      position: relative;
+      float: left;
+      width: calc(100% / 7);
+      height: 60rpx;
+      padding: 20rpx;
+      box-sizing: border-box;
+
+      margin-bottom: 20rpx;
+    }
+    .day-item {
+      z-index: 200;
+    }
+    .not-view-month {
+      color: lightgray;
+    }
+    .round {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: black;
+      width: 72rpx;
+      height: 72rpx;
+      border-radius: 50%;
+      z-index: 102;
+    }
+    .restime {
+      color: white;
+    }
+  }
+}
+</style>
+
+<template>
+<view class="calendar-bg"  wx:if="{{visible}}" >
+  <view class="calendar-wrapper">
+    <view class="calendar-header" style="background-color: {{color}}">
+      <view>{{current.year}}</view>
+      <view>{{current.month}}月{{current.day}}日{{current.weekCh}}</view>
+    </view>
+    <view class="calendar-content">
+      <view class="pick-view">
+        <view class="pick-img">
+          <view>
+          <image @tap="toPreMonth" src="/asset/icons/left-can.png"></image>
+          </view>
+          <view>
+          <image @tap="toNextMonth" src="/asset/icons/right-can.png"></image>
+          </view>
+        </view>
+        <picker bindchange="changePicker"  value="{{viewTime.year}}-{{viewTime.month}}" start="2018-01" fields="month" mode="date">
+          <view class="flex-center">
+          {{viewTime.year}}年{{viewTime.month}}月
+          </view>
+        </picker>
+      </view>
+      <view class="week flex-center">
+        <block wx:for="{{weeksCh}}" wx:key="{{item}}">
+          <view class="flex-center">{{item}}</view>
+        </block>
+      </view>
+      <view class="day clearfix">
+        <block wx:for="{{viewDays}}" wx:key="{{item.key}}">
+          <view @tap="changeResultTime({{item}})"class="flex-center {{(item.formatDay === current.formatDay)&&(item.month === viewTime.month && item.year === viewTime.year) ? 'restime' : ''}}">
+            <view  class="day-item {{!(item.month === viewTime.month && item.year === viewTime.year)? 'not-view-month' : ''  }}">{{item.day}}</view>
+            <view style="background-color: {{color}}" wx-if="{{(item.formatDay === current.formatDay)&&(item.month === viewTime.month && item.year === viewTime.year)}}" class="round"> </view>
+          </view>
+        </block>
+      </view>
+
+    </view>
+    <view class="confirm">
+        <view style="margin-right:60rpx; color: {{color}}" @tap="cancel">取消</view>
+        <view style="color: {{color}}" @tap="confirm">确定</view>
+      </view>
+  </view>
+</view>
+
+</template>
+
+<script>
+import wepy from 'wepy'
+import moment from 'moment'
+export default class Calendar extends wepy.component {
+  props = {
+    visible: {
+      type: Boolean,
+      default: false,
+      twoWay: true
+    },
+    value: {
+      type: String,
+      default: moment().format('YYYY-MM-DD')
+    },
+    color: {
+      type: String,
+      default: 'black'
+    }
+
+  }
+  data = {
+    weeksCh: ['一', '二', '三', '四', '五', '六', '日'],
+    // 数组最后导出的日期
+    current: {
+      year: '',
+      month: '',
+      day: '',
+      formatDay: '',
+      weekCh: ''
+    },
+    viewTime: {
+      year: '',
+      month: '',
+      day: '',
+      formatDay: '',
+      weekCh: ''
+    },
+    // 当前视图的day数组
+    viewDays: []
+
+  }
+  methods = {
+    // pick选择器改变了
+    changePicker (e) {
+      // 改变当前视图日期数组
+      this.viewDays = this._getData(moment(e.detail.value, 'YYYY-MM'))
+    },
+    // 点击上个月
+    toPreMonth () {
+      this.viewDays = this._getData(moment(this.viewTime.formatDay).subtract(1, 'days'))
+    },
+    // 点击下个月
+    toNextMonth () {
+      this.viewDays = this._getData(moment(this.viewTime.formatDay).endOf('month').add(1, 'days'))
+    },
+    // 改变最后导出的时间
+    changeResultTime (item) {
+      // console.log(item)
+      if (item.month === this.viewTime.month && item.year === this.viewTime.year) {
+        this._setTime(moment(item.formatDay))
+      } else {
+        return false
+      }
+    },
+    // 用户点击取消
+    cancel () {
+      this.visible = false
+      this._init(this.value)
+    },
+    // 用户点击确定
+    confirm () {
+      this.$emit('hanleConfirm', this.current)
+      this.visible = false
+    }
+  }
+  watch = {
+    value (newValue, oldValue) {
+      this._init(newValue)
+    }
+  }
+  /**
+   * _getData
+   * 返回当前视图日期数组
+   * @param time
+   * @return [{day:31,month:3,year:2018},{day:1,month:4,year:2018},...]
+   */
+  _getData (time = moment()) {
+    this._setViewTime(time)
+    // 令时间变为当月1号的
+    const firstDay = time.startOf('month')
+    // 计算当月1号是星期几
+    const firstDayOfWeek = firstDay.format('E')
+    // 计算上个月多余时间
+    const last = this._calDate(firstDay.subtract(firstDayOfWeek - 1, 'days'), firstDayOfWeek - 1)
+    // 计算本月时间
+    const current = this._calDate(firstDay, firstDay.daysInMonth())
+    // 令时间变为本月末
+    const endDay = time.subtract(1, 'days')
+    // 当月与末是星期几
+    const endDayOfWeek = endDay.format('E')
+    // 计算下个月多余时间
+    const next = this._calDate(endDay.add(1, 'days'), 7 - endDayOfWeek)
+    return [...last, ...current, ...next]
+  }
+  /**
+   * _setTime
+   * 设定导出的时间
+   * @param time moment对象
+   */
+  _setTime (time = moment()) {
+    this.current = this._dealMoment(time)
+  }
+  /**
+   * _setTime
+   * 设定当前日历的时间
+   * @param time moment对象
+   */
+  _setViewTime (time = moment()) {
+    this.viewTime = this._dealMoment(time.startOf('month'))
+  }
+  /**
+   * _calDate
+   * 计算日期函数
+   * @param time moment对象
+   * @param length 返回数组的长度
+   * @return 返回日期数组
+   */
+  _calDate (time, length) {
+    let arr = []
+    for (let i = 0; i < length; i++) {
+      arr.push(this._dealMoment(time))
+      time.add(1, 'days')
+    }
+    return arr
+  }
+  /**
+   * _dealMoment
+   * 处理moment对象
+   * @param time moment对象
+   * @return 返回一个Object{year, month, day, formatDay}
+   */
+  _dealMoment (time) {
+    let { years, months, date } = time.toObject()
+    return {
+      year: years,
+      month: months + 1,
+      day: date,
+      weekCh: '周' + this.weeksCh[time.format('E') - 1],
+      formatDay: time.format('YYYY-MM-DD')
+    }
+  }
+  /**
+   * _init
+   * 初始化
+   * @param value '2018-02-02' YYYY-MM-DD
+   */
+  _init (value) {
+    this.viewDays = this._getData(moment(value))
+    this._setTime(moment(value))
+  }
+  onShow () {
+  }
+  onLoad () {
+    this._init(this.value)
+  }
+}
+</script>
