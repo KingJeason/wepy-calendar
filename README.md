@@ -18,7 +18,7 @@
 ### 项目依赖moment
 ### cnpm install moment --save
 
-```js
+```
 import calendar from '../components/calendar
 
 <calendar :visible.sync="calendarVisible"  :value.sync="time" @hanleConfirm.user="hanleConfirm" color="#05c8d3"></calendar>
@@ -41,7 +41,7 @@ import calendar from '../components/calendar
 
 ```
 最后导出的数据很友好:
-```json
+```
 // 导出一个object
 {
     day:27,
@@ -91,7 +91,6 @@ import calendar from '../components/calendar
           <td>black</td>
           <td>日历主色</td>
         </tr>
-
     </tbody>
 </table>
 
