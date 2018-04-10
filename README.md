@@ -4,19 +4,18 @@
 
 ## Screenshots
 
+![日期选择器](http://or9d9eqg0.bkt.clouddn.com/calendar.gif)
 
+![日期选择器](http://or9d9eqg0.bkt.clouddn.com/calendar2)
 
-<img src="http://or9d9eqg0.bkt.clouddn.com/calendar2" width="288"/>
-
-<img src="http://or9d9eqg0.bkt.clouddn.com/calendar3.png" width="288"/>
-
-<img src="http://or9d9eqg0.bkt.clouddn.com/calendar.gif" width="288"/>
+![日期选择器](http://or9d9eqg0.bkt.clouddn.com/calendar3.png)
 
 
 ## Usage
 ### 首先记得把asset/icons下的2个小图标放到自己的资源文件里哦
 ### 项目依赖moment
 ### cnpm install moment --save
+### 代码全部有注释,使用上有问题请在github联系我,欢迎pr
 
 ```
 import calendar from '../components/calendar
